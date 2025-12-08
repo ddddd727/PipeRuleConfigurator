@@ -5,12 +5,17 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:vm="clr-namespace:PipeRuleConfigurator.ViewModels"
+             xmlns:local="clr-namespace:PipeRuleConfigurator.Views"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1200">
 
     <UserControl.DataContext>
         <vm:DictionaryViewModel/>
     </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <local:RowStateToBrushConverter x:Key="RowStateConverter"/>
+    </UserControl.Resources>
 
     <Grid Background="{DynamicResource MaterialDesignPaper}">
         <Grid.RowDefinitions>
@@ -76,6 +81,8 @@
                   ItemsSource="{Binding TableData}" 
                   SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
                   SelectionChanged="DataGrid_SelectionChanged"
+                  LoadingRow="DataGrid_LoadingRow"
+                  RowEditEnding="DataGrid_RowEditEnding"
                   AutoGenerateColumns="True" 
                   AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
                   CanUserAddRows="False"
@@ -93,6 +100,12 @@
                     <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 </Style>
             </DataGrid.Resources>
+
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
+                    <Setter Property="Background" Value="{Binding Converter={StaticResource RowStateConverter}}"/>
+                </Style>
+            </DataGrid.RowStyle>
 
             <DataGrid.Columns>
                 <DataGridCheckBoxColumn Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
