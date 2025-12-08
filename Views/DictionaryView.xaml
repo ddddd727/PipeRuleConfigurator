@@ -92,19 +92,38 @@
         <DataGrid Grid.Row="2" 
                   ItemsSource="{Binding TableData}" 
                   AutoGenerateColumns="True" 
+                  AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
                   CanUserAddRows="False"
-                  HeadersVisibility="All" 
+                  HeadersVisibility="Column" 
                   SelectionUnit="FullRow"
                   IsReadOnly="False"
                   BorderThickness="1"
                   BorderBrush="{DynamicResource MaterialDesignDivider}"
                   Margin="20,0,20,20">
+
             <DataGrid.Resources>
                 <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
                     <Setter Property="FontWeight" Value="SemiBold"/>
                     <Setter Property="Padding" Value="10,8"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 </Style>
             </DataGrid.Resources>
+
+            <DataGrid.Columns>
+                <DataGridCheckBoxColumn Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
+                                        ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
+                                        EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}">
+                    <DataGridCheckBoxColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding DataContext.IsAllSelected, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                                      ToolTip="全选/取消全选"
+                                      HorizontalAlignment="Center" 
+                                      VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridCheckBoxColumn.HeaderTemplate>
+                </DataGridCheckBoxColumn>
+            </DataGrid.Columns>
+
         </DataGrid>
 
     </Grid>
