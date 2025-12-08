@@ -28,9 +28,16 @@ namespace PipeRuleConfigurator.ViewModels
         [ObservableProperty]
         private string _selectedNodeTitle = "未选择";
 
-        // --- 新增：全选状态绑定 ---
+        // 选中行 (用于自动滚动)
+        [ObservableProperty]
+        private DataRowView _selectedRow;
+
         [ObservableProperty]
         private bool _isAllSelected;
+
+        // --- 新增：输入提供者 (由 View 层赋值) ---
+        // 参数是提示标题，返回值是用户输入的字符串
+        public Func<string, string> InputProvider { get; set; }
 
         // 下拉框选项源
         public List<string> StatusOptions { get; } = new List<string> { "启用", "禁用" };
@@ -41,22 +48,14 @@ namespace PipeRuleConfigurator.ViewModels
             InitStaticMenu();
         }
 
-        // 监听全选框变化
         partial void OnIsAllSelectedChanged(bool value)
         {
             if (TableData?.Table == null) return;
-
-            // 遍历更新每一行的选中状态
             foreach (DataRow row in TableData.Table.Rows)
             {
-                // 排除已删除的行
-                if (row.RowState != DataRowState.Deleted)
+                if (row.RowState != DataRowState.Deleted && TableData.Table.Columns.Contains("IsSelected"))
                 {
-                    // 确保列存在再赋值
-                    if (TableData.Table.Columns.Contains("IsSelected"))
-                    {
-                        row["IsSelected"] = value;
-                    }
+                    row["IsSelected"] = value;
                 }
             }
         }
@@ -70,12 +69,9 @@ namespace PipeRuleConfigurator.ViewModels
 
         private async Task LoadDataForNode(TreeItem item)
         {
-            // 切换数据前，先重置全选状态（防止残留）
             IsAllSelected = false;
-
             DataTable dt = await _service.GetTableDataAsync(item.Title);
 
-            // 注入“勾选”列
             if (!dt.Columns.Contains("IsSelected"))
             {
                 DataColumn selectCol = new DataColumn("IsSelected", typeof(bool));
@@ -100,7 +96,7 @@ namespace PipeRuleConfigurator.ViewModels
             TreeNodes = new ObservableCollection<TreeItem> { root };
         }
 
-        // --- 按钮命令 ---
+        // --- 功能实现 ---
 
         [RelayCommand]
         private void AddRow()
@@ -117,20 +113,53 @@ namespace PipeRuleConfigurator.ViewModels
             if (TableData.Table.Columns.Contains("更新时间")) newRow["更新时间"] = DateTime.Now;
 
             TableData.Table.Rows.Add(newRow);
+
+            if (TableData.Count > 0)
+            {
+                SelectedRow = TableData[TableData.Count - 1];
+            }
         }
 
         [RelayCommand]
         private void AddColumn()
         {
-            if (TableData == null || TableData.Table == null) return;
-
-            string newColName = $"自定义列_{TableData.Table.Columns.Count}";
-            while (TableData.Table.Columns.Contains(newColName))
+            if (TableData == null || TableData.Table == null)
             {
-                newColName += "_New";
+                MessageBox.Show("请先加载数据表！");
+                return;
             }
-            TableData.Table.Columns.Add(new DataColumn(newColName, typeof(string)) { AllowDBNull = true });
-            TableData = TableData.Table.DefaultView;
+
+            // 1. 调用 View 提供的输入框
+            if (InputProvider == null)
+            {
+                MessageBox.Show("未初始化输入组件。");
+                return;
+            }
+
+            string newColName = InputProvider.Invoke("请输入新列的名称：");
+
+            // 如果用户取消或输入为空，则不处理
+            if (string.IsNullOrWhiteSpace(newColName)) return;
+
+            // 2. 校验重复
+            if (TableData.Table.Columns.Contains(newColName))
+            {
+                MessageBox.Show($"列名 [{newColName}] 已存在，请重试。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                // 3. 添加列
+                TableData.Table.Columns.Add(new DataColumn(newColName, typeof(string)) { AllowDBNull = true });
+
+                // 4. 强制刷新：创建新的 DataView
+                TableData = new DataView(TableData.Table);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("添加列失败：" + ex.Message);
+            }
         }
 
         [RelayCommand]
@@ -185,7 +214,6 @@ namespace PipeRuleConfigurator.ViewModels
                 if (row.RowState == DataRowState.Deleted) continue;
                 if (TableData.Table.Columns.Count > 1)
                 {
-                    // 简单校验逻辑
                     string firstDataColName = TableData.Table.Columns[1].ColumnName;
                     var val = row[firstDataColName]?.ToString();
                     if (string.IsNullOrWhiteSpace(val))

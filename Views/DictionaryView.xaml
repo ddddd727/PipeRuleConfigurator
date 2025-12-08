@@ -27,7 +27,6 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-
                         <ListBox Grid.Row="0" 
                                  ItemsSource="{Binding TreeNodes[0].Children}" 
                                  SelectedItem="{Binding SelectedTreeItem}"
@@ -36,13 +35,11 @@
                                  BorderThickness="0"
                                  Background="Transparent"
                                  VerticalAlignment="Center">
-
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Orientation="Horizontal"/>
                                 </ItemsPanelTemplate>
                             </ListBox.ItemsPanel>
-
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem" BasedOn="{StaticResource MaterialDesignListBoxItem}">
                                     <Setter Property="Padding" Value="8,6"/>
@@ -51,31 +48,17 @@
                                     <Setter Property="materialDesign:ListBoxItemAssist.CornerRadius" Value="4"/>
                                 </Style>
                             </ListBox.ItemContainerStyle>
-
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <materialDesign:PackIcon Kind="{Binding IconKind}" 
-                                                                 Width="18" Height="18" 
-                                                                 VerticalAlignment="Center"
-                                                                 Foreground="{DynamicResource PrimaryHueMidBrush}"
-                                                                 Margin="0,0,6,0"/>
-                                        <TextBlock Text="{Binding Title}" 
-                                                   FontSize="13" 
-                                                   VerticalAlignment="Center"
-                                                   Foreground="{DynamicResource MaterialDesignBody}"/>
+                                        <materialDesign:PackIcon Kind="{Binding IconKind}" Width="18" Height="18" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,6,0"/>
+                                        <TextBlock Text="{Binding Title}" FontSize="13" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBody}"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-
                         <Border Grid.Row="1" Background="{DynamicResource MaterialDesignDivider}" Padding="2">
-                            <TextBlock Text="{Binding TreeNodes[0].Title}" 
-                                       FontSize="10" 
-                                       Foreground="{DynamicResource MaterialDesignBody}"
-                                       Opacity="0.7"
-                                       HorizontalAlignment="Center" 
-                                       FontWeight="Medium"/>
+                            <TextBlock Text="{Binding TreeNodes[0].Title}" FontSize="10" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.7" HorizontalAlignment="Center" FontWeight="Medium"/>
                         </Border>
                     </Grid>
                 </Border>
@@ -91,6 +74,8 @@
 
         <DataGrid Grid.Row="2" 
                   ItemsSource="{Binding TableData}" 
+                  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
+                  SelectionChanged="DataGrid_SelectionChanged"
                   AutoGenerateColumns="True" 
                   AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
                   CanUserAddRows="False"
@@ -111,6 +96,7 @@
 
             <DataGrid.Columns>
                 <DataGridCheckBoxColumn Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
+                                        CanUserSort="False"
                                         ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
                                         EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}">
                     <DataGridCheckBoxColumn.HeaderTemplate>
