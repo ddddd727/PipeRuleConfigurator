@@ -80,8 +80,7 @@
         <DataGrid Grid.Row="2" 
                   ItemsSource="{Binding TableData}" 
                   SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
-                  SelectionChanged="DataGrid_SelectionChanged"
-                  LoadingRow="DataGrid_LoadingRow"
+                  BeginningEdit="DataGrid_BeginningEdit"
                   RowEditEnding="DataGrid_RowEditEnding"
                   AutoGenerateColumns="True" 
                   AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
@@ -103,7 +102,21 @@
 
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
-                    <Setter Property="Background" Value="{Binding Converter={StaticResource RowStateConverter}}"/>
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <MultiBinding Converter="{StaticResource RowStateConverter}">
+                                <Binding Path="." />
+                                <Binding Path="RefreshTrigger" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                            </MultiBinding>
+                        </Setter.Value>
+                    </Setter>
+
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding 状态}" Value="禁用">
+                            <Setter Property="Background" Value="#F5F5F5"/>
+                            <Setter Property="Foreground" Value="Gray"/>
+                        </DataTrigger>
+                    </Style.Triggers>
                 </Style>
             </DataGrid.RowStyle>
 
