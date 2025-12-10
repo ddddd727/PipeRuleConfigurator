@@ -44,7 +44,7 @@ namespace PipeRuleConfigurator.ViewModels
 
         public DictionaryViewModel()
         {
-            _service = new MockDictionaryService();
+            _service = new MockDictionaryDataService();
             InitStaticMenu();
         }
 

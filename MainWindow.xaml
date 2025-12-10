@@ -19,9 +19,24 @@
             </TabItem>
 
             <TabItem Header="基础类">
-                <TextBlock Text="基础类开发中..." HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <views:BasicClassView/>
             </TabItem>
 
+            <TabItem Header="Spec配置">
+                <TextBlock Text="Spec配置开发中..." HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </TabItem>
+
+            <TabItem Header="PMC编码">
+                <TextBlock Text="Spec配置开发中..." HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </TabItem>
+
+            <TabItem Header="船型船号基础数据">
+                <TextBlock Text="Spec配置开发中..." HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </TabItem>
+
+            <TabItem Header="Spec配置">
+                <TextBlock Text="Spec配置开发中..." HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </TabItem>
             <TabItem Header="Spec配置">
                 <TextBlock Text="Spec配置开发中..." HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </TabItem>

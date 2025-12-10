@@ -2,28 +2,29 @@
 using System.Windows.Controls;
 using System.Data;
 using PipeRuleConfigurator.ViewModels;
-using PipeRuleConfigurator.Common;
+using PipeRuleConfigurator.Common; // 引用公共类
 
 namespace PipeRuleConfigurator.Views
 {
-    public partial class DictionaryView : UserControl
+    public partial class BasicClassView : UserControl
     {
-        public DictionaryView()
+        public BasicClassView()
         {
             InitializeComponent();
-            this.DataContextChanged += DictionaryView_DataContextChanged;
-            if (this.DataContext is DictionaryViewModel vm) InjectInputProvider(vm);
+            this.DataContextChanged += BasicClassView_DataContextChanged;
+            if (this.DataContext is BasicClassViewModel vm) InjectInputProvider(vm);
         }
 
-        private void DictionaryView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void BasicClassView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (e.NewValue is DictionaryViewModel vm) InjectInputProvider(vm);
+            if (e.NewValue is BasicClassViewModel vm) InjectInputProvider(vm);
         }
 
-        private void InjectInputProvider(DictionaryViewModel vm)
+        private void InjectInputProvider(BasicClassViewModel vm)
         {
             vm.InputProvider = (title) =>
             {
+                // 直接使用公共弹窗类
                 var dialog = new SimpleInputDialog(title);
                 dialog.Owner = Window.GetWindow(this);
                 if (dialog.ShowDialog() == true) return dialog.InputText;
@@ -31,26 +32,19 @@ namespace PipeRuleConfigurator.Views
             };
         }
 
-        // --- 业务逻辑：拦截禁用行的编辑 ---
         private void DataGrid_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
-            // 1. 获取列名
+            // 复用之前的业务逻辑：禁用状态下不可编辑
             string colName = e.Column.Header as string;
             if (string.IsNullOrEmpty(colName)) colName = e.Column.SortMemberPath;
 
-            // 2. "状态"列永远允许编辑 (否则无法从禁用改回启用)
             if (colName == "状态") return;
 
-            // 3. 检查当前行状态
             if (e.Row.Item is DataRowView drv)
             {
                 string status = drv["状态"]?.ToString();
-                if (status == "禁用")
-                {
-                    e.Cancel = true; // 禁止编辑
-                }
+                if (status == "禁用") e.Cancel = true;
             }
         }
     }
-  
 }
