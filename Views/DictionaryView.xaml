@@ -5,123 +5,151 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:vm="clr-namespace:PipeRuleConfigurator.ViewModels"
-             
+             xmlns:models="clr-namespace:PipeRuleConfigurator.Models"
              xmlns:common="clr-namespace:PipeRuleConfigurator.Common"
-             
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1200">
+             d:DesignHeight="600" d:DesignWidth="1200"
+             
+             TextOptions.TextFormattingMode="Display"
+             TextOptions.TextRenderingMode="ClearType"
+             UseLayoutRounding="True"
+             FontFamily="Microsoft YaHei UI, Segoe UI"
+             FontSize="13">
 
     <UserControl.DataContext>
         <vm:DictionaryViewModel/>
     </UserControl.DataContext>
 
     <Grid Background="{DynamicResource MaterialDesignPaper}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <Border Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource MaterialDesignDivider}">
-            <StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Left">
-                <Border BorderThickness="1" BorderBrush="{DynamicResource MaterialDesignDivider}" CornerRadius="4" Margin="2">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <ListBox Grid.Row="0" 
-                                 ItemsSource="{Binding TreeNodes[0].Children}" 
-                                 SelectedItem="{Binding SelectedTreeItem}"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                 BorderThickness="0"
-                                 Background="Transparent"
-                                 VerticalAlignment="Center">
-                            <ListBox.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal"/>
-                                </ItemsPanelTemplate>
-                            </ListBox.ItemsPanel>
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource MaterialDesignListBoxItem}">
-                                    <Setter Property="Padding" Value="8,6"/>
-                                    <Setter Property="Margin" Value="2"/>
-                                    <Setter Property="Cursor" Value="Hand"/>
-                                    <Setter Property="materialDesign:ListBoxItemAssist.CornerRadius" Value="4"/>
-                                </Style>
-                            </ListBox.ItemContainerStyle>
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <materialDesign:PackIcon Kind="{Binding IconKind}" Width="18" Height="18" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,6,0"/>
-                                        <TextBlock Text="{Binding Title}" FontSize="13" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBody}"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                        <Border Grid.Row="1" Background="{DynamicResource MaterialDesignDivider}" Padding="2">
-                            <TextBlock Text="{Binding TreeNodes[0].Title}" FontSize="10" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.7" HorizontalAlignment="Center" FontWeight="Medium"/>
-                        </Border>
-                    </Grid>
-                </Border>
-            </StackPanel>
+        <Border Grid.Column="0" 
+                BorderThickness="0,0,1,0" 
+                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                Background="#FAFAFA">
+            <Grid Margin="0,10,0,0">
+                <TreeView ItemsSource="{Binding TreeNodes}" 
+                          SelectedItemChanged="TreeView_SelectedItemChanged"
+                          BorderThickness="0"
+                          Background="Transparent"
+                          Padding="5">
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate DataType="{x:Type models:TreeItem}" ItemsSource="{Binding Children}">
+                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                <materialDesign:PackIcon Kind="{Binding IconKind}" 
+                                                         Width="16" Height="16" 
+                                                         VerticalAlignment="Center" 
+                                                         Foreground="{DynamicResource PrimaryHueMidBrush}" 
+                                                         Margin="0,0,8,0"/>
+                                <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="TreeViewItem" BasedOn="{StaticResource MaterialDesignTreeViewItem}">
+                            <Setter Property="IsExpanded" Value="True"/>
+                            <Setter Property="Padding" Value="8,6"/>
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                </TreeView>
+            </Grid>
         </Border>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="20,15,20,10" HorizontalAlignment="Left">
-            <Button Command="{Binding AddRowCommand}" Content="增加行" Style="{StaticResource MaterialDesignOutlinedButton}" Height="30" Margin="0,0,10,0"/>
-            <Button Command="{Binding AddColumnCommand}" Content="增加列" Style="{StaticResource MaterialDesignOutlinedButton}" Height="30" Margin="0,0,10,0"/>
-            <Button Command="{Binding EditCommand}" Content="编辑" Style="{StaticResource MaterialDesignOutlinedButton}" Height="30" Margin="0,0,10,0"/>
-            <Button Command="{Binding SaveCommand}" Content="保存" Style="{StaticResource MaterialDesignFlatMidBgButton}" Height="30"/>
-        </StackPanel>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <DataGrid Grid.Row="2" 
-                  ItemsSource="{Binding TableData}" 
-                  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
-                  
-                  common:DataGridHighlightHelper.Enable="True"
-                  BeginningEdit="DataGrid_BeginningEdit"
-                  
-                  GridLinesVisibility="All"
-                  VerticalGridLinesBrush="{DynamicResource MaterialDesignDivider}"
-                  HorizontalGridLinesBrush="{DynamicResource MaterialDesignDivider}"
-                  
-                  AutoGenerateColumns="True" 
-                  CanUserAddRows="False"
-                  HeadersVisibility="Column" 
-                  SelectionUnit="FullRow"
-                  IsReadOnly="False"
-                  BorderThickness="1"
-                  BorderBrush="{DynamicResource MaterialDesignDivider}"
-                  Margin="20,0,20,20">
+            <Grid Grid.Row="0" Margin="20,15,20,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="250"/>
+                </Grid.ColumnDefinitions>
 
-            <DataGrid.Resources>
-                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
-                    <Setter Property="FontWeight" Value="SemiBold"/>
-                    <Setter Property="Padding" Value="10,8"/>
-                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                    <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
-                </Style>
-            </DataGrid.Resources>
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Button Command="{Binding AddRowCommand}" Content="增加行" Style="{StaticResource MaterialDesignOutlinedButton}" Height="30" Margin="0,0,10,0"/>
+                    <Button Command="{Binding AddColumnCommand}" Content="增加列" Style="{StaticResource MaterialDesignOutlinedButton}" Height="30" Margin="0,0,10,0"/>
 
-            <DataGrid.Columns>
-                <DataGridCheckBoxColumn Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
-                                        CanUserSort="False"
-                                        ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
-                                        EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}">
-                    <DataGridCheckBoxColumn.HeaderTemplate>
-                        <DataTemplate>
-                            <CheckBox IsChecked="{Binding DataContext.IsAllSelected, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
-                                      ToolTip="全选/取消全选"
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridCheckBoxColumn.HeaderTemplate>
-                </DataGridCheckBoxColumn>
-            </DataGrid.Columns>
+                    <Button Command="{Binding DeleteSelectedCommand}" Content="删除选中" 
+                            Style="{StaticResource MaterialDesignOutlinedButton}" 
+                            BorderBrush="#E53935" Foreground="#E53935"
+                            Height="30" Margin="0,0,10,0"/>
 
-        </DataGrid>
+                    <Button Command="{Binding SaveCommand}" Content="保存" Style="{StaticResource MaterialDesignFlatMidBgButton}" Height="30"/>
+                </StackPanel>
 
+                <TextBox Grid.Column="2"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         materialDesign:HintAssist.Hint="搜索..."
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Padding="10,6" Height="34" VerticalAlignment="Center"/>
+            </Grid>
+
+            <DataGrid Grid.Row="1" 
+                      ItemsSource="{Binding TableData}" 
+                      SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
+                      
+                      common:DataGridHighlightHelper.Enable="True"
+                      BeginningEdit="DataGrid_BeginningEdit"
+                      RowEditEnding="DataGrid_RowEditEnding" 
+                      
+                      GridLinesVisibility="All"
+                      VerticalGridLinesBrush="{DynamicResource MaterialDesignDivider}"
+                      HorizontalGridLinesBrush="{DynamicResource MaterialDesignDivider}"
+                      AutoGenerateColumns="True" 
+                      CanUserAddRows="False"
+                      HeadersVisibility="Column" 
+                      SelectionUnit="FullRow"
+                      IsReadOnly="False"
+                      BorderThickness="1"
+                      BorderBrush="{DynamicResource MaterialDesignDivider}"
+                      Margin="20,0,20,20"
+                      
+                      FrozenColumnCount="2">
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="复制当前行 (Duplicate)" Command="{Binding DuplicateRowCommand}">
+                            <MenuItem.Icon>
+                                <materialDesign:PackIcon Kind="ContentCopy" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="Padding" Value="10,8"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+                        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+                    </Style>
+                </DataGrid.Resources>
+
+                <DataGrid.Columns>
+                    <DataGridCheckBoxColumn Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
+                                            CanUserSort="False"
+                                            ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
+                                            EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}">
+                        <DataGridCheckBoxColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding DataContext.IsAllSelected, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                                          ToolTip="全选/取消全选"
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridCheckBoxColumn.HeaderTemplate>
+                    </DataGridCheckBoxColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
     </Grid>
 </UserControl>

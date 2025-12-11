@@ -5,9 +5,14 @@
         xmlns:views="clr-namespace:PipeRuleConfigurator.Views"
         Title="管系规则配置" Height="700" Width="1200"
         WindowStartupLocation="CenterScreen"
+        
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
-        FontFamily="{DynamicResource MaterialDesignFont}">
+        FontFamily="{DynamicResource MaterialDesignFont}"
+
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType"
+        UseLayoutRounding="True">
 
     <materialDesign:Card UniformCornerRadius="0" Padding="0">
         <TabControl materialDesign:ColorZoneAssist.Mode="PrimaryMid"

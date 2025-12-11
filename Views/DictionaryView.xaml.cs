@@ -1,8 +1,10 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Data;
 using PipeRuleConfigurator.ViewModels;
 using PipeRuleConfigurator.Common;
+using PipeRuleConfigurator.Models;
 
 namespace PipeRuleConfigurator.Views
 {
@@ -31,26 +33,43 @@ namespace PipeRuleConfigurator.Views
             };
         }
 
-        // --- 业务逻辑：拦截禁用行的编辑 ---
-        private void DataGrid_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
+        private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            // 1. 获取列名
-            string colName = e.Column.Header as string;
-            if (string.IsNullOrEmpty(colName)) colName = e.Column.SortMemberPath;
-
-            // 2. "状态"列永远允许编辑 (否则无法从禁用改回启用)
-            if (colName == "状态") return;
-
-            // 3. 检查当前行状态
-            if (e.Row.Item is DataRowView drv)
+            if (this.DataContext is DictionaryViewModel vm)
             {
-                string status = drv["状态"]?.ToString();
-                if (status == "禁用")
+                if (e.NewValue is TreeItem selectedItem)
                 {
-                    e.Cancel = true; // 禁止编辑
+                    vm.SelectedTreeItem = selectedItem;
                 }
             }
         }
+
+        private void DataGrid_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
+        {
+            string colName = e.Column.Header as string;
+            // 处理 header 可能包含 * 号的情况
+            if (string.IsNullOrEmpty(colName)) colName = e.Column.SortMemberPath;
+
+            // "状态" 列永远允许编辑
+            if (colName.StartsWith("状态")) return;
+
+            if (e.Row.Item is DataRowView drv)
+            {
+                string status = drv["状态"]?.ToString();
+                if (status == "禁用") e.Cancel = true;
+            }
+        }
+
+        // 【新增】行编辑结束时触发校验
+        private void DataGrid_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
+        {
+            this.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (e.Row.Item is DataRowView drv && this.DataContext is DictionaryViewModel vm)
+                {
+                    vm.ValidateRow(drv.Row);
+                }
+            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+        }
     }
-  
 }
